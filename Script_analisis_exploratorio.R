@@ -43,9 +43,10 @@ muestra <- sample(c(TRUE, FALSE), nrow(data), replace=TRUE, prob=c(0.7,0.3))
 train  <- data1[muestra, ]
 test   <- data1[!muestra, ]
 test
-
+boxplot(data1$precio)
 reg_lineal <- lm(precio~., data=train)
 summary(reg_lineal)
+plot(precio~., train)
 #Ahora podemos observar que el modelo es significativo al 95% ya sin variables correlacionadas
 #Ahora comprobamos con el testing set
 predict(reg_lineal, test)
