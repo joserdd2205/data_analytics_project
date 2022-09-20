@@ -107,4 +107,4 @@ for link in links_paginas:
 with open("/Users/jose/PycharmProjects/selenium/autos_seminuevos.csv", 'w', encoding="UTF-8") as f:
     writer = csv.writer(f)
     writer.writerows(lista_de_autos)
-print(fallos)
+
