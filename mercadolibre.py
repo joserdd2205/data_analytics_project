@@ -18,6 +18,7 @@ class Articulo(Item):
     descripcion = Field()
     caracteristicas = Field()
 
+
 class MercadoLibreCrawler(CrawlSpider, ABC):
     name = "Mercado Libre"
     custom_settings = {
@@ -53,17 +54,21 @@ class MercadoLibreCrawler(CrawlSpider, ABC):
         precio = soup.find(class_="andes-money-amount__fraction").text
         descripcion = soup.find(class_="ui-pdp-description__content").text
 
-        #get all the caracteristic name and value
+        # get all the caracteristic name and value
         caract = [x.get_text() for x in soup.find_all(class_="andes-table__column--value")]
         tcaracteristicas = [x.get_text() for x in soup.find_all(class_="andes-table__header andes-table__"
                                                                        "header--left ui-pdp-specs__table__column "
                                                                        "ui-pdp-specs__table__column-title")]
-        #convert to dict in order to use it on json
+        # convert to dict in order to use it on json
         cardict = dict(zip(tcaracteristicas, caract))
 
         item = ItemLoader(Articulo(), response.body)
         item.add_value("nombre", nombre)
         item.add_value('precio', precio)
         item.add_value('descripcion', descripcion)
-        item.add_value('caract', cardict)
+        item.add_value('caracteristicas', cardict)
         yield item.load_item()
+
+
+
+
