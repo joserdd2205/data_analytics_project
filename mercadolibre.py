@@ -16,13 +16,7 @@ class Articulo(Item):
     nombre = Field()
     precio = Field()
     descripcion = Field()
-    marca = Field()
-    modelo = Field()
-    año = Field()
-    color = Field()
-    tipo_combustible = Field()
-    kilometraje = Field()
-
+    caracteristicas = Field()
 
 class MercadoLibreCrawler(CrawlSpider, ABC):
     name = "Mercado Libre"
@@ -58,20 +52,18 @@ class MercadoLibreCrawler(CrawlSpider, ABC):
         nombre = soup.find("h1").text
         precio = soup.find(class_="andes-money-amount__fraction").text
         descripcion = soup.find(class_="ui-pdp-description__content").text
-        #TODO: Solve irregularities within table "caracteristicas" - some have 6 rows while others have 7 or more
-        caracteristicas = [x.get_text() for x in soup.find_all(class_="andes-table__column--value")]
 
-
-        marca, modelo, año, color, Tipo_combustible, kilometraje = caracteristicas
+        #get all the caracteristic name and value
+        caract = [x.get_text() for x in soup.find_all(class_="andes-table__column--value")]
+        tcaracteristicas = [x.get_text() for x in soup.find_all(class_="andes-table__header andes-table__"
+                                                                       "header--left ui-pdp-specs__table__column "
+                                                                       "ui-pdp-specs__table__column-title")]
+        #convert to dict in order to use it on json
+        cardict = dict(zip(tcaracteristicas, caract))
 
         item = ItemLoader(Articulo(), response.body)
         item.add_value("nombre", nombre)
         item.add_value('precio', precio)
         item.add_value('descripcion', descripcion)
-        item.add_value('marca', marca)
-        item.add_value('modelo', modelo)
-        item.add_value('año', año)
-        item.add_value('color', color)
-        item.add_value('tipo_combustible', Tipo_combustible)
-        item.add_value('kilometraje', kilometraje)
+        item.add_value('caract', cardict)
         yield item.load_item()
