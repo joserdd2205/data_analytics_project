@@ -9,6 +9,7 @@ from scrapy.loader.processors import MapCompose
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import Spider
 from scrapy.crawler import CrawlerProcess
+from bs4 import BeautifulSoup
 
 
 class Articulo(Item):
@@ -16,10 +17,10 @@ class Articulo(Item):
     precio = Field()
     descripcion = Field()
     marca = Field()
-    modelo= Field()
-    año=Field()
-    color= Field()
-    Tipo_combustible= Field()
+    modelo = Field()
+    año = Field()
+    color = Field()
+    tipo_combustible = Field()
     kilometraje = Field()
 
 
@@ -32,7 +33,7 @@ class MercadoLibreCrawler(CrawlSpider, ABC):
 
     download_delay = 1
 
-    allowed_domains = ['articulo.mercadolibre.com.mx', 'listado.mercadolibre.com.mx']
+    allowed_domains = ['auto.mercadolibre.com.mx', 'listado.mercadolibre.com.mx']
     start_urls = ['https://listado.mercadolibre.com.mx/autos']
     handle_httpstatus_list = [403]
     rules = (
@@ -53,12 +54,24 @@ class MercadoLibreCrawler(CrawlSpider, ABC):
     )
 
     def parse_articulo(self, response):
-        sel = Selector(response)
-        item = ItemLoader(Articulo(), sel)
-        item.add_xpath('nombre', '//div[@id="header"]//h1/text()')
-        item.add_xpath('precio', '//meta[@itemprop="price"]/@content')
-        item.add_xpath('descripcion', '//p[@class="ui-pdp-description__content"]/text()')
+        soup = BeautifulSoup(response.body)
+        nombre = soup.find("h1").text
+        precio = soup.find(class_="andes-money-amount__fraction").text
+        descripcion = soup.find(class_="ui-pdp-description__content").text
+        #TODO: Solve irregularities within table "caracteristicas" - some have 6 rows while others have 7 or more
+        caracteristicas = [x.get_text() for x in soup.find_all(class_="andes-table__column--value")]
 
+
+        marca, modelo, año, color, Tipo_combustible, kilometraje = caracteristicas
+
+        item = ItemLoader(Articulo(), response.body)
+        item.add_value("nombre", nombre)
+        item.add_value('precio', precio)
+        item.add_value('descripcion', descripcion)
+        item.add_value('marca', marca)
+        item.add_value('modelo', modelo)
+        item.add_value('año', año)
+        item.add_value('color', color)
+        item.add_value('tipo_combustible', Tipo_combustible)
+        item.add_value('kilometraje', kilometraje)
         yield item.load_item()
-
-
