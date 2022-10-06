@@ -23,21 +23,23 @@ class MercadoLibreCrawler(CrawlSpider, ABC):
     name = "Mercado Libre"
     custom_settings = {
         'USER_AGENT': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.5 (KHTML, like Gecko) Chrome/19.0.1084.52 Safari/536.5',
-        'CLOSESPIDER_PAGECOUNT': 20
+        'CLOSESPIDER_PAGEOUNT': 5000,
+        'ROBOTSTXT_OBEY': 'False'
     }
 
     download_delay = 1
 
-    allowed_domains = ['auto.mercadolibre.com.mx', 'listado.mercadolibre.com.mx']
-    start_urls = ['https://listado.mercadolibre.com.mx/autos']
+    allowed_domains = ['autos.mercadolibre.com.mx', 'auto.mercadolibre.com.mx']
+    start_urls = ['https://autos.mercadolibre.com.mx']
     handle_httpstatus_list = [403]
     rules = (
-        # paginacion
+                # paginacion
         Rule(
             LinkExtractor(
-                allow=r'_Desde_'
+            allow=r'/_Desde_'
             ), follow=True
-        ),
+            ),
+
         # vertical
         Rule(
             LinkExtractor(
@@ -45,6 +47,7 @@ class MercadoLibreCrawler(CrawlSpider, ABC):
             ), follow=True, callback='parse_articulo'
 
         )
+
 
     )
 
